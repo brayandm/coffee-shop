@@ -50,5 +50,19 @@ def favourite_coffee():
 
     if user is None:
         return jsonify({'error': 'Unauthenticated'}), 401
+    
+    if request.method == 'GET':
+
+        return jsonify({"data": {"favouriteCofee": database[user]["favorite_coffee"]}}), 200
+    
+    elif request.method == 'POST':
+
+        if not request.json or not 'favouriteCofee' in request.json:
+            return jsonify({'error': 'Bad request'}), 400
+
+        database[user]["favorite_coffee"] = request.json['favouriteCofee']
+        
+        return jsonify({"data": {"favouriteCofee": database[user]["favorite_coffee"]}}), 200
+
 
 app.register_blueprint(apiv1)

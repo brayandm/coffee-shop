@@ -12,8 +12,8 @@ pip install pipenv
 pipenv install
 ```
 
-3 - Start the server on port 5000:
+3 - Start the server on port 8080:
 
 ```bash
-pipenv run flask run --reload
+pipenv run flask run --reload --port=8080
 ```

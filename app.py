@@ -1,7 +1,11 @@
-from flask import Flask
+from flask import Flask, Blueprint
 
 app = Flask(__name__)
 
-@app.route("/")
+apiv1 = Blueprint('v1', __name__, url_prefix='/v1')
+
+@apiv1.route("/ping",  methods=['GET'])
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return "pong"
+
+app.register_blueprint(apiv1)

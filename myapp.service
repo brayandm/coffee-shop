@@ -1,0 +1,10 @@
+[Unit]
+Description=Go Application
+After=network.target
+
+[Service]
+ExecStart=/home/ec2-user/coffee-shop/startserver.sh
+Type=simple
+
+[Install]
+WantedBy=default.target

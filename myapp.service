@@ -1,6 +1,5 @@
 [Unit]
-Description=Go Application
-After=network.target
+Description=My Shell Script
 
 [Service]
 ExecStart=/home/ec2-user/coffee-shop/startserver.sh

@@ -2,7 +2,7 @@
 Description=My Shell Script
 
 [Service]
-ExecStart=/home/ec2-user/coffee-shop/startserver
+ExecStart=/home/ec2-user/coffee-shop/startserver.sh
 
 [Install]
 WantedBy=default.target

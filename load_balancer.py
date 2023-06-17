@@ -6,15 +6,15 @@ app = Flask(__name__)
 applications = [
     {
         "guestUrl": "http://localhost:8080",
-        "healthCheckUrl": "server1.test"
+        "healthCheckUrl": "http://server1.test"
     },
     {
         "guestUrl": "http://localhost:8081",
-        "healthCheckUrl": "server2.test"
+        "healthCheckUrl": "http://server2.test"
     },
     {
         "guestUrl": "http://localhost:8082",
-        "healthCheckUrl": "server3.test"
+        "healthCheckUrl": "http://server3.test"
     }
 ]
 
@@ -23,8 +23,6 @@ round_robin = {
 }
 
 def health_check(application):
-
-    return True
 
     try:
 

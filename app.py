@@ -1,5 +1,7 @@
 from flask import Flask, Blueprint, jsonify, request
 import base64
+import os
+
 
 app = Flask(__name__)
 
@@ -49,7 +51,7 @@ def is_admin(user):
 
 @apiv1.route("/ping",  methods=['GET'])
 def hello_world():
-    return "pong"
+    return "server " + os.environ.get('SERVER_ID') + " response: pong"
 
 @apiv1.route('/coffee/favourite', methods=['GET', 'POST'])
 def favourite_coffee():

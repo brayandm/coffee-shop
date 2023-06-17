@@ -2,20 +2,50 @@ version: "3.9"
 
 services:
 
-    server:
+    server1.test:
         build:
             context: .
             dockerfile: docker/Dockerfile-server
         ports:
             - "127.0.0.1:80:80"
         networks:
-            - academic-assistant-local
+            - coffee-shop
         environment:
             - SERVER_ID=1
         restart: always
         command: ["sh", "-c", "flask run --reload --host=0.0.0.0 --port=80"]
+    
+    server2.test:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-server
+        networks:
+            - coffee-shop
+        environment:
+            - SERVER_ID=2
+        restart: always
+        command: ["sh", "-c", "flask run --reload --host=0.0.0.0 --port=80"]
+
+    server3.test:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-server
+        networks:
+            - coffee-shop
+        environment:
+            - SERVER_ID=2
+        restart: always
+        command: ["sh", "-c", "flask run --reload --host=0.0.0.0 --port=80"]
+
+    guest:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-guest
+        networks:
+            - coffee-shop
+        restart: always
+        command: ["sh", "-c", "sleep infinity"]
 
 networks:
-    academic-assistant-local:
+    coffee-shop:
         driver: bridge
-        external: true

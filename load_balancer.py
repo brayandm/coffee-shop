@@ -5,6 +5,8 @@ app = Flask(__name__)
 
 applications = ["http://localhost:8080", "http://localhost:8081", "http://localhost:8082"]
 
+robinIndex = 0
+
 @app.route('/loadbalancer/apps', methods=['GET', 'POST'])
 def manage_applications():
 
@@ -28,8 +30,15 @@ def manage_applications():
 def load_balancer(path):
 
     global applications
+    global robinIndex
 
-    app = random.choice(applications)
+    if len(applications) == 0:
+
+        return jsonify({'error': 'No applications available'}), 500
+    
+    app = applications[robinIndex]
+
+    robinIndex = (robinIndex + 1) % len(applications)
 
     return redirect(f'{app}/{path}', 307)
     

@@ -69,7 +69,6 @@ for user in seed:
 
         conn.commit()
 
-
 def get_user(auth_header):
 
     cursor = conn.cursor()
@@ -85,6 +84,8 @@ def get_user(auth_header):
 
     if data is None or password != data[3]:
         return None
+    
+    conn.commit()
 
     return user
 
@@ -93,6 +94,8 @@ def is_admin(user):
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM users WHERE username = %s", (user,))
+
+    conn.commit()
 
     return cursor.fetchone()[1]
 
@@ -116,6 +119,8 @@ def favourite_coffee():
 
         data = cursor.fetchone()
 
+        conn.commit()
+
         return jsonify({"data": {"favouriteCofee": data[4]}}), 200
     
     elif request.method == 'POST':
@@ -130,6 +135,8 @@ def favourite_coffee():
         cursor.execute("SELECT * FROM users WHERE username = %s", (user,))
 
         data = cursor.fetchone()
+
+        conn.commit()
 
         return jsonify({"data": {"favouriteCofee": data[4]}}), 200
     
@@ -158,6 +165,8 @@ def top_favourite_coffee():
             coffee_count[coffee] = 1
 
     top_coffee = sorted(coffee_count, key=coffee_count.get, reverse=True)[:3]
+
+    conn.commit()
 
     return jsonify({"data": {"top3": top_coffee}}), 200
 

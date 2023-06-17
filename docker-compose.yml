@@ -19,6 +19,8 @@ services:
         build:
             context: .
             dockerfile: docker/Dockerfile-server
+        ports:
+            - "127.0.0.1:8081:80"
         networks:
             - coffee-shop
         environment:
@@ -30,10 +32,12 @@ services:
         build:
             context: .
             dockerfile: docker/Dockerfile-server
+        ports:
+            - "127.0.0.1:8082:80"
         networks:
             - coffee-shop
         environment:
-            - SERVER_ID=2
+            - SERVER_ID=3
         restart: always
         command: ["sh", "-c", "flask run --reload --host=0.0.0.0 --port=80"]
 
@@ -42,7 +46,7 @@ services:
             context: .
             dockerfile: docker/Dockerfile-loadbalancer
         ports:
-            - "127.0.0.1:8081:80"
+            - "127.0.0.1:8083:80"
         networks:
             - coffee-shop
         restart: always

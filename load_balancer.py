@@ -10,15 +10,15 @@ app = Flask(__name__)
 
 applications = [
     {
-        "guestUrl": "http://localhost:8080",
+        "guestUrl": "http://localhost:8081",
         "healthCheckUrl": "http://server1.test"
     },
     {
-        "guestUrl": "http://localhost:8081",
+        "guestUrl": "http://localhost:8082",
         "healthCheckUrl": "http://server2.test"
     },
     {
-        "guestUrl": "http://localhost:8082",
+        "guestUrl": "http://localhost:8083",
         "healthCheckUrl": "http://server3.test"
     }
 ]

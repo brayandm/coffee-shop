@@ -7,7 +7,7 @@ services:
             context: .
             dockerfile: docker/Dockerfile-server
         ports:
-            - "127.0.0.1:8083:80"
+            - "127.0.0.1:8081:80"
         networks:
             - coffee-shop
         environment:
@@ -16,6 +16,9 @@ services:
             - DB_USERNAME=${DB_USERNAME}
             - DB_PASSWORD=${DB_PASSWORD}
             - DB_HOST=${DB_HOST}
+        depends_on:
+            mysql:
+                condition: service_healthy
         restart: always
         command: ["sh", "-c", "flask run --reload --host=0.0.0.0 --port=80"]
     
@@ -33,6 +36,9 @@ services:
             - DB_USERNAME=${DB_USERNAME}
             - DB_PASSWORD=${DB_PASSWORD}
             - DB_HOST=${DB_HOST}
+        depends_on:
+            mysql:
+                condition: service_healthy
         restart: always
         command: ["sh", "-c", "flask run --reload --host=0.0.0.0 --port=80"]
 
@@ -41,7 +47,7 @@ services:
             context: .
             dockerfile: docker/Dockerfile-server
         ports:
-            - "127.0.0.1:8081:80"
+            - "127.0.0.1:8083:80"
         networks:
             - coffee-shop
         environment:
@@ -50,6 +56,9 @@ services:
             - DB_USERNAME=${DB_USERNAME}
             - DB_PASSWORD=${DB_PASSWORD}
             - DB_HOST=${DB_HOST}
+        depends_on:
+            mysql:
+                condition: service_healthy
         restart: always
         command: ["sh", "-c", "flask run --reload --host=0.0.0.0 --port=80"]
 
@@ -61,6 +70,9 @@ services:
             - "127.0.0.1:8080:80"
         networks:
             - coffee-shop
+        depends_on:
+            mysql:
+                condition: service_healthy
         restart: always
         command: ["sh", "-c", "flask --app=load_balancer run --reload --host=0.0.0.0 --port=80"]
 
@@ -70,6 +82,9 @@ services:
             dockerfile: docker/Dockerfile-guest
         networks:
             - coffee-shop
+        depends_on:
+            mysql:
+                condition: service_healthy
         restart: always
         command: ["sh", "-c", "sleep infinity"]
 

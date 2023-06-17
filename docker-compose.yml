@@ -113,7 +113,7 @@ services:
                 - ping
                 - '-p${DB_PASSWORD}'
             retries: 3
-            timeout: 5s
+            timeout: 3s
 
 networks:
     coffee-shop:

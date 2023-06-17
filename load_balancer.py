@@ -1,5 +1,10 @@
 from flask import Flask, jsonify, request, redirect
+import logging
 import requests
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 app = Flask(__name__)
 
@@ -57,7 +62,7 @@ def manage_applications():
 
         return jsonify({"data": {"applications": applications}}), 200
     
-    
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])
 def load_balancer(path):
@@ -68,22 +73,23 @@ def load_balancer(path):
 
         return jsonify({'error': 'No applications available'}), 500
     
-    app = None
+    application = None
     
     for _ in range(len(applications)):
 
         if health_check(applications[round_robin["index"]]["healthCheckUrl"]):
-            app = applications[round_robin["index"]]["guestUrl"]
+            application = applications[round_robin["index"]]["guestUrl"]
             round_robin["index"] = (round_robin["index"] + 1) % len(applications)
             break
 
         round_robin["index"] = (round_robin["index"] + 1) % len(applications)
 
     
-    if app is None:
+    if application is None:
             
             return jsonify({'error': 'No applications available'}), 500
-
     
-    return redirect(f'{app}/{path}', 307)
+    app.logger.info(f'Forwarding request to {application}/{path}')
+    
+    return redirect(f'{application}/{path}', 307)
     

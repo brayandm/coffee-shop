@@ -1,10 +1,9 @@
-from flask import Flask, Blueprint, jsonify, request
-import base64
-import os
+from flask import Flask, jsonify, request, redirect
+import random
 
 app = Flask(__name__)
 
-applications = ["server1.test", "server2.test", "server3.test"]
+applications = ["http://localhost:8080", "http://localhost:8081", "http://localhost:8082"]
 
 @app.route('/loadbalancer/apps', methods=['GET', 'POST'])
 def manage_applications():
@@ -23,4 +22,14 @@ def manage_applications():
         applications = request.json['applications']
 
         return jsonify({"data": {"applications": applications}}), 200
-        
+    
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])
+def load_balancer(path):
+
+    global applications
+
+    app = random.choice(applications)
+
+    return redirect(f'{app}/{path}', 307)
+    

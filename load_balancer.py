@@ -9,8 +9,8 @@ applications = ["server1.test", "server2.test", "server3.test"]
 @app.route('/loadbalancer/apps', methods=['GET', 'POST'])
 def favourite_coffee():
 
-    print(applications)
-    
+    global applications
+
     if request.method == 'GET':
 
         return jsonify({"data": {"applications": applications}}), 200

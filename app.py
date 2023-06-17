@@ -70,72 +70,51 @@ for user in seed:
         conn.commit()
 
 
-database = {
-    "user1": {
-        "is_admin": True,
-        "password": "password1",
-        "favorite_coffee": "cappuccino"
-    },
-    "user2": {
-        "is_admin": False,
-        "password": "password2",
-        "favorite_coffee": "latte"
-    },
-    "user3": {
-        "is_admin": False,
-        "password": "password3",
-        "favorite_coffee": "espresso"
-    },
-    "user4": {
-        "is_admin": False,
-        "password": "password4",
-        "favorite_coffee": "mocha"
-    },
-    "user5": {
-        "is_admin": False,
-        "password": "password5",
-        "favorite_coffee": "americano"
-    }
-}
-
 def get_user(auth_header):
     if not auth_header or not auth_header.startswith('Basic '):
         return None
     auth_string = base64.b64decode(auth_header[6:]).decode('utf-8')
     user, password = auth_string.split(':')
 
-    if user not in database or password != database[user]['password']:
+    cursor.execute("SELECT * FROM users WHERE username = %s", (user,))
+
+    data = cursor.fetchone()
+
+    if data is None or password != data[3]:
         return None
 
     return user
 
 def is_admin(user):
-    return database[user]['is_admin']
+
+    cursor.execute("SELECT * FROM users WHERE username = %s", (user,))
+
+    return cursor.fetchone()[1]
 
 @apiv1.route("/ping",  methods=['GET'])
 def hello_world():
     return "server " + os.environ.get('SERVER_ID') + " response: pong"
 
-@apiv1.route('/coffee/favourite', methods=['GET', 'POST'])
-def favourite_coffee():
+# @apiv1.route('/coffee/favourite', methods=['GET', 'POST'])
+# def favourite_coffee():
 
-    user = get_user(request.headers.get('Authorization'))
+#     user = get_user(request.headers.get('Authorization'))
 
-    if user is None:
-        return jsonify({'error': 'Unauthenticated'}), 401
+#     if user is None:
+#         return jsonify({'error': 'Unauthenticated'}), 401
     
-    if request.method == 'GET':
+#     if request.method == 'GET':
 
-        return jsonify({"data": {"favouriteCofee": database[user]["favorite_coffee"]}}), 200
+#         return jsonify({"data": {"favouriteCofee": database[user]["favorite_coffee"]}}), 200
     
-    elif request.method == 'POST':
+#     elif request.method == 'POST':
 
-        if not request.json or not 'favouriteCofee' in request.json:
-            return jsonify({'error': 'Bad request'}), 400
+#         if not request.json or not 'favouriteCofee' in request.json:
+#             return jsonify({'error': 'Bad request'}), 400
 
-        database[user]["favorite_coffee"] = request.json['favouriteCofee']
+#         database[user]["favorite_coffee"] = request.json['favouriteCofee']
 
-        return jsonify({"data": {"favouriteCofee": database[user]["favorite_coffee"]}}), 200
+#         return jsonify({"data": {"favouriteCofee": database[user]["favorite_coffee"]}}), 200
     
 @apiv1.route('admin/coffee/favourite/leadeboard', methods=['GET'])
 def top_favourite_coffee():
@@ -147,8 +126,12 @@ def top_favourite_coffee():
 
     coffee_count = {}
 
-    for user in database:
-        coffee = database[user]["favorite_coffee"]
+    cursor.execute("SELECT * FROM users")
+
+    users = cursor.fetchall()
+
+    for user in users:
+        coffee = user[4]
         if coffee in coffee_count:
             coffee_count[coffee] += 1
         else:

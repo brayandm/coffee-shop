@@ -1,0 +1,108 @@
+version: "3.9"
+
+services:
+
+    server1.test:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-server
+        ports:
+            - "127.0.0.1:8080:80"
+        networks:
+            - coffee-shop
+        environment:
+            - SERVER_ID=1
+            - DB_DATABASE=${DB_DATABASE}
+            - DB_USERNAME=${DB_USERNAME}
+            - DB_PASSWORD=${DB_PASSWORD}
+            - DB_HOST=${DB_HOST}
+        restart: always
+        command: ["sh", "-c", "flask run --reload --host=0.0.0.0 --port=80"]
+    
+    server2.test:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-server
+        ports:
+            - "127.0.0.1:8081:80"
+        networks:
+            - coffee-shop
+        environment:
+            - SERVER_ID=2
+            - DB_DATABASE=${DB_DATABASE}
+            - DB_USERNAME=${DB_USERNAME}
+            - DB_PASSWORD=${DB_PASSWORD}
+            - DB_HOST=${DB_HOST}
+        restart: always
+        command: ["sh", "-c", "flask run --reload --host=0.0.0.0 --port=80"]
+
+    server3.test:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-server
+        ports:
+            - "127.0.0.1:8082:80"
+        networks:
+            - coffee-shop
+        environment:
+            - SERVER_ID=3
+            - DB_DATABASE=${DB_DATABASE}
+            - DB_USERNAME=${DB_USERNAME}
+            - DB_PASSWORD=${DB_PASSWORD}
+            - DB_HOST=${DB_HOST}
+        restart: always
+        command: ["sh", "-c", "flask run --reload --host=0.0.0.0 --port=80"]
+
+    loadbalancer.test:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-loadbalancer
+        ports:
+            - "127.0.0.1:8083:80"
+        networks:
+            - coffee-shop
+        restart: always
+        command: ["sh", "-c", "flask --app=load_balancer run --reload --host=0.0.0.0 --port=80"]
+
+    guest:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-guest
+        networks:
+            - coffee-shop
+        restart: always
+        command: ["sh", "-c", "sleep infinity"]
+
+    mysql:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-mysql
+        restart: always
+        ports:
+            - "127.0.0.1:3304:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        volumes:
+            - 'volume-mysql:/var/lib/mysql'
+        networks:
+            - coffee-shop
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p${DB_PASSWORD}'
+            retries: 3
+            timeout: 5s
+
+networks:
+    coffee-shop:
+        driver: bridge
+
+volumes:
+    volume-mysql:

@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 flask = "*"
 importlib-metadata = "*"
+requests = "*"
+mysql-connector-python = "*"
 
 [dev-packages]
 

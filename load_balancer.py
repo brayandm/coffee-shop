@@ -57,6 +57,7 @@ def manage_applications():
 
         return jsonify({"data": {"applications": applications}}), 200
     
+    
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])
 def load_balancer(path):

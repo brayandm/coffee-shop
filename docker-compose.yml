@@ -7,7 +7,7 @@ services:
             context: .
             dockerfile: docker/Dockerfile-server
         ports:
-            - "127.0.0.1:8080:80"
+            - "127.0.0.1:8083:80"
         networks:
             - coffee-shop
         environment:
@@ -24,7 +24,7 @@ services:
             context: .
             dockerfile: docker/Dockerfile-server
         ports:
-            - "127.0.0.1:8081:80"
+            - "127.0.0.1:8082:80"
         networks:
             - coffee-shop
         environment:
@@ -41,7 +41,7 @@ services:
             context: .
             dockerfile: docker/Dockerfile-server
         ports:
-            - "127.0.0.1:8082:80"
+            - "127.0.0.1:8081:80"
         networks:
             - coffee-shop
         environment:
@@ -58,7 +58,7 @@ services:
             context: .
             dockerfile: docker/Dockerfile-loadbalancer
         ports:
-            - "127.0.0.1:8083:80"
+            - "127.0.0.1:8080:80"
         networks:
             - coffee-shop
         restart: always

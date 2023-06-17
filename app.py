@@ -19,7 +19,56 @@ conn = mysql.connector.connect(**config)
 
 cursor = conn.cursor()
 
-cursor.execute("CREATE TABLE IF NOT EXISTS users (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, is_admin BOOLEAN, password VARCHAR(255), favorite_coffee VARCHAR(255))")
+cursor.execute("CREATE TABLE IF NOT EXISTS users (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, is_admin BOOLEAN, username VARCHAR(255), password VARCHAR(255), favorite_coffee VARCHAR(255))")
+
+seed = [
+    {
+        "id" : 1,
+        "username": "user1",
+        "is_admin": True,
+        "password": "password1",
+        "favorite_coffee": "cappuccino"
+    },
+    {
+        "id" : 2,
+        "username": "user2",
+        "is_admin": False,
+        "password": "password2",
+        "favorite_coffee": "latte"
+    },
+    {
+        "id" : 3,
+        "username": "user3",
+        "is_admin": False,
+        "password": "password3",
+        "favorite_coffee": "espresso"
+    },
+    {
+        "id" : 4,
+        "username": "user4",
+        "is_admin": False,
+        "password": "password4",
+        "favorite_coffee": "mocha"
+    },
+    {
+        "id" : 5,
+        "username": "user5",
+        "is_admin": False,
+        "password": "password5",
+        "favorite_coffee": "americano"
+    }
+]
+
+for user in seed:
+
+    cursor.execute("SELECT * FROM users WHERE id = %s", (user['id'],))
+
+    if cursor.fetchone() is None:
+
+        cursor.execute("INSERT INTO users (is_admin, username, password, favorite_coffee) VALUES (%s, %s, %s, %s)", (user['is_admin'], user['username'], user['password'], user['favorite_coffee']))
+
+        conn.commit()
+
 
 database = {
     "user1": {

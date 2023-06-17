@@ -7,7 +7,7 @@ app = Flask(__name__)
 applications = ["server1.test", "server2.test", "server3.test"]
 
 @app.route('/loadbalancer/apps', methods=['GET', 'POST'])
-def favourite_coffee():
+def manage_applications():
 
     global applications
 

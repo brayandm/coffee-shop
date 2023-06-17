@@ -1,11 +1,25 @@
 from flask import Flask, Blueprint, jsonify, request
 import base64
 import os
-
+import mysql.connector
 
 app = Flask(__name__)
 
 apiv1 = Blueprint('v1', __name__, url_prefix='/v1')
+
+config = {
+    'user': os.environ.get('DB_USERNAME'),
+    'password': os.environ.get('DB_PASSWORD'),
+    'host': os.environ.get('DB_HOST'),
+    'database': os.environ.get('DB_DATABASE'),
+    'port': '3306'
+}
+
+conn = mysql.connector.connect(**config)
+
+cursor = conn.cursor()
+
+cursor.execute("CREATE TABLE IF NOT EXISTS users (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, is_admin BOOLEAN, password VARCHAR(255), favorite_coffee VARCHAR(255))")
 
 database = {
     "user1": {

@@ -71,6 +71,9 @@ for user in seed:
 
 
 def get_user(auth_header):
+
+    cursor = conn.cursor()
+
     if not auth_header or not auth_header.startswith('Basic '):
         return None
     auth_string = base64.b64decode(auth_header[6:]).decode('utf-8')
@@ -87,6 +90,8 @@ def get_user(auth_header):
 
 def is_admin(user):
 
+    cursor = conn.cursor()
+
     cursor.execute("SELECT * FROM users WHERE username = %s", (user,))
 
     return cursor.fetchone()[1]
@@ -95,29 +100,44 @@ def is_admin(user):
 def hello_world():
     return "server " + os.environ.get('SERVER_ID') + " response: pong"
 
-# @apiv1.route('/coffee/favourite', methods=['GET', 'POST'])
-# def favourite_coffee():
+@apiv1.route('/coffee/favourite', methods=['GET', 'POST'])
+def favourite_coffee():
 
-#     user = get_user(request.headers.get('Authorization'))
+    cursor = conn.cursor()
 
-#     if user is None:
-#         return jsonify({'error': 'Unauthenticated'}), 401
+    user = get_user(request.headers.get('Authorization'))
+
+    if user is None:
+        return jsonify({'error': 'Unauthenticated'}), 401
     
-#     if request.method == 'GET':
+    if request.method == 'GET':
 
-#         return jsonify({"data": {"favouriteCofee": database[user]["favorite_coffee"]}}), 200
+        cursor.execute("SELECT * FROM users WHERE username = %s", (user,))
+
+        data = cursor.fetchone()
+
+        return jsonify({"data": {"favouriteCofee": data[4]}}), 200
     
-#     elif request.method == 'POST':
+    elif request.method == 'POST':
 
-#         if not request.json or not 'favouriteCofee' in request.json:
-#             return jsonify({'error': 'Bad request'}), 400
+        if not request.json or not 'favouriteCofee' in request.json:
+            return jsonify({'error': 'Bad request'}), 400
 
-#         database[user]["favorite_coffee"] = request.json['favouriteCofee']
+        cursor.execute("UPDATE users SET favorite_coffee = %s WHERE username = %s", (request.json['favouriteCofee'], user))
 
-#         return jsonify({"data": {"favouriteCofee": database[user]["favorite_coffee"]}}), 200
+        conn.commit()
+
+        cursor.execute("SELECT * FROM users WHERE username = %s", (user,))
+
+        data = cursor.fetchone()
+
+        return jsonify({"data": {"favouriteCofee": data[4]}}), 200
+    
     
 @apiv1.route('admin/coffee/favourite/leadeboard', methods=['GET'])
 def top_favourite_coffee():
+
+    cursor = conn.cursor()
 
     user = get_user(request.headers.get('Authorization'))
 

@@ -2,6 +2,14 @@ from flask import Flask, Blueprint, jsonify, request
 import base64
 import os
 import mysql.connector
+import boto3
+
+sqs_client = boto3.client(
+    "sqs",
+    region_name=os.environ.get("AWS_DEFAULT_REGION"),
+    aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+)
 
 app = Flask(__name__)
 
@@ -137,6 +145,12 @@ def create_user():
     )
 
     conn.commit()
+
+    queue_url = os.environ.get("AWS_SQS_QUEUE_URL")
+
+    sqs_client.send_message(
+        QueueUrl=queue_url, MessageBody=f"User {request.json['username']} created"
+    )
 
     return jsonify({"data": {"username": request.json["username"]}}), 200
 

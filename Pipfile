@@ -8,6 +8,7 @@ flask = "*"
 importlib-metadata = "*"
 requests = "*"
 mysql-connector-python = "*"
+boto3 = "*"
 
 [dev-packages]
 

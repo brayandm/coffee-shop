@@ -115,7 +115,30 @@ def hello_world():
 
 @apiv1.route("/user/create", methods=["POST"])
 def create_user():
-    return jsonify({"error": "Not implemented"}), 501
+    cursor = conn.cursor()
+
+    if (
+        not request.json
+        or not "username" in request.json
+        or not "password" in request.json
+    ):
+        return jsonify({"error": "Bad request"}), 400
+
+    cursor.execute(
+        "SELECT * FROM users WHERE username = %s", (request.json["username"],)
+    )
+
+    if cursor.fetchone() is not None:
+        return jsonify({"error": "Username already exists"}), 400
+
+    cursor.execute(
+        "INSERT INTO users (is_admin, username, password, favorite_coffee) VALUES (%s, %s, %s, %s)",
+        (False, request.json["username"], request.json["password"], ""),
+    )
+
+    conn.commit()
+
+    return jsonify({"data": {"username": request.json["username"]}}), 200
 
 
 @apiv1.route("/coffee/favourite", methods=["GET", "POST"])

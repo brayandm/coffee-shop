@@ -88,6 +88,25 @@ services:
         restart: always
         command: ["sh", "-c", "flask --app=load_balancer run --reload --host=0.0.0.0 --port=80"]
 
+    consumer:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-consumer
+        ports:
+            - "127.0.0.1:8084:80"
+        networks:
+            - coffee-shop
+        environment:
+            - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+            - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            - AWS_SQS_QUEUE_URL=${AWS_SQS_QUEUE_URL}
+        depends_on:
+            mysql:
+                condition: service_healthy
+        restart: always
+        command: ["sh", "-c", "flask --app=consumer run --reload --host=0.0.0.0 --port=80"]
+
     guest:
         build:
             context: .

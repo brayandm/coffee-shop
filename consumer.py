@@ -1,6 +1,6 @@
-from flask import Flask, Blueprint, jsonify, request
 import os
 import boto3
+import time
 
 sqs_client = boto3.client(
     "sqs",
@@ -9,14 +9,26 @@ sqs_client = boto3.client(
     aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
 )
 
-app = Flask(__name__)
+if __name__ == "__main__":
+    while True:
+        queue_url = os.environ.get("AWS_SQS_QUEUE_URL")
 
-apiv1 = Blueprint("v1", __name__, url_prefix="/v1")
+        response = sqs_client.receive_message(
+            QueueUrl=queue_url, MaxNumberOfMessages=1, WaitTimeSeconds=5
+        )
 
+        if "Messages" in response:
+            for message in response["Messages"]:
+                print("Message body:", message["Body"])
 
-@apiv1.route("/ping", methods=["GET"])
-def hello_world():
-    return "consumer response: pong"
+                print("Processing message:", message["MessageId"])
 
+                time.sleep(3)
 
-app.register_blueprint(apiv1)
+                print("Deleting message:", message["MessageId"])
+
+                sqs_client.delete_message(
+                    QueueUrl=queue_url, ReceiptHandle=message["ReceiptHandle"]
+                )
+        else:
+            print("No messages available")

@@ -149,7 +149,8 @@ def create_user():
     queue_url = os.environ.get("AWS_SQS_QUEUE_URL")
 
     sqs_client.send_message(
-        QueueUrl=queue_url, MessageBody=f"User {request.json['username']} created"
+        QueueUrl=queue_url,
+        MessageBody=f"User \"{request.json['username']}\" was created",
     )
 
     return jsonify({"data": {"username": request.json["username"]}}), 200

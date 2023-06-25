@@ -3,6 +3,8 @@ import base64
 import os
 import mysql.connector
 import boto3
+import threading
+
 
 sqs_client = boto3.client(
     "sqs",
@@ -218,6 +220,10 @@ def top_favourite_coffee():
     return jsonify({"data": {"top3": top_coffee}}), 200
 
 
+def reset_rate_limit(user):
+    user_token_bucket[user] = 3
+
+
 def rate_limit(user):
     if user_token_bucket.get(user) is None:
         user_token_bucket[user] = 3
@@ -226,6 +232,10 @@ def rate_limit(user):
         return False
 
     user_token_bucket[user] -= 1
+
+    if user_token_bucket[user] == 0:
+        timer = threading.Timer(60, reset_rate_limit, [user])
+        timer.start()
 
     return True
 

@@ -72,6 +72,7 @@ seed = [
 ]
 
 user_token_bucket = {}
+ip_token_bucket = {}
 
 for user in seed:
     cursor.execute("SELECT * FROM users WHERE id = %s", (user["id"],))
@@ -154,7 +155,7 @@ def create_user():
 def favourite_coffee():
     cursor = conn.cursor()
 
-    user = get_user(request.headers.get("Authorization"))
+    user, is_admin = get_user(request.headers.get("Authorization"))
 
     if user is None:
         return jsonify({"error": "Unauthenticated"}), 401
@@ -171,6 +172,11 @@ def favourite_coffee():
     elif request.method == "POST":
         if not request.json or not "favouriteCofee" in request.json:
             return jsonify({"error": "Bad request"}), 400
+
+        ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+        if not rate_limit_ip(ip_address):
+            return jsonify({"error": "Too many requests"}), 429
 
         cursor.execute(
             "UPDATE users SET favorite_coffee = %s WHERE username = %s",
@@ -235,6 +241,26 @@ def rate_limit(user):
 
     if user_token_bucket[user] == 0:
         timer = threading.Timer(60, reset_rate_limit, [user])
+        timer.start()
+
+    return True
+
+
+def reset_rate_limit_ip(ip):
+    ip_token_bucket[ip] = 10
+
+
+def rate_limit_ip(ip):
+    if ip_token_bucket.get(ip) is None:
+        ip_token_bucket[ip] = 10
+
+    if ip_token_bucket[ip] == 0:
+        return False
+
+    ip_token_bucket[ip] -= 1
+
+    if ip_token_bucket[ip] == 0:
+        timer = threading.Timer(60, reset_rate_limit_ip, [ip])
         timer.start()
 
     return True

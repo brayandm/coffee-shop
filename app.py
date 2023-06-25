@@ -42,7 +42,7 @@ seed = [
     {
         "id": 2,
         "username": "user2",
-        "is_admin": False,
+        "is_admin": True,
         "password": "password2",
         "favorite_coffee": "latte",
     },
@@ -195,6 +195,9 @@ def top_favourite_coffee():
     if user is None or not is_admin:
         return jsonify({"error": "Unauthenticated"}), 401
 
+    if not rate_limit(user):
+        return jsonify({"error": "Too many requests"}), 429
+
     coffee_count = {}
 
     cursor.execute("SELECT * FROM users")
@@ -213,6 +216,18 @@ def top_favourite_coffee():
     conn.commit()
 
     return jsonify({"data": {"top3": top_coffee}}), 200
+
+
+def rate_limit(user):
+    if user_token_bucket.get(user) is None:
+        user_token_bucket[user] = 3
+
+    if user_token_bucket[user] == 0:
+        return False
+
+    user_token_bucket[user] -= 1
+
+    return True
 
 
 app.register_blueprint(apiv1)

@@ -69,6 +69,8 @@ seed = [
     },
 ]
 
+user_token_bucket = {}
+
 for user in seed:
     cursor.execute("SELECT * FROM users WHERE id = %s", (user["id"],))
 
@@ -103,17 +105,7 @@ def get_user(auth_header):
 
     conn.commit()
 
-    return user
-
-
-def is_admin(user):
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM users WHERE username = %s", (user,))
-
-    conn.commit()
-
-    return cursor.fetchone()[1]
+    return user, data[1]
 
 
 @apiv1.route("/ping", methods=["GET"])
@@ -198,9 +190,9 @@ def favourite_coffee():
 def top_favourite_coffee():
     cursor = conn.cursor()
 
-    user = get_user(request.headers.get("Authorization"))
+    user, is_admin = get_user(request.headers.get("Authorization"))
 
-    if user is None or not is_admin(user):
+    if user is None or not is_admin:
         return jsonify({"error": "Unauthenticated"}), 401
 
     coffee_count = {}

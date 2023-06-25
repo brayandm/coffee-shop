@@ -137,14 +137,6 @@ services:
             - 'volume-mysql:/var/lib/mysql'
         networks:
             - coffee-shop
-        healthcheck:
-            test:
-                - CMD
-                - mysqladmin
-                - ping
-                - '-p${DB_PASSWORD}'
-            retries: 3
-            timeout: 3s
 
 networks:
     coffee-shop:

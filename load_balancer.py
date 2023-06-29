@@ -1,6 +1,16 @@
 from flask import Flask, jsonify, request, redirect
 import logging
 import requests
+import boto3
+import os
+import json
+
+s3_client = boto3.client(
+    "s3",
+    region_name=os.environ.get("AWS_DEFAULT_REGION"),
+    aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+)
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -10,11 +20,51 @@ logging.basicConfig(
 
 app = Flask(__name__)
 
-applications = [
-    {"guestUrl": "http://localhost:8081", "healthCheckUrl": "http://server1.test"},
-    {"guestUrl": "http://localhost:8082", "healthCheckUrl": "http://server2.test"},
-    {"guestUrl": "http://localhost:8083", "healthCheckUrl": "http://server3.test"},
-]
+applications = []
+
+try:
+    response = s3_client.get_object(
+        Bucket=os.environ.get("AWS_BUCKET_NAME"), Key="applications.json"
+    )
+    content = response["Body"].read().decode("utf-8")
+    applications = json.loads(content)
+
+except:
+    s3_client.put_object(
+        Body=json.dumps(
+            [
+                {
+                    "guestUrl": "http://localhost:8081",
+                    "healthCheckUrl": "http://server1.test",
+                },
+                {
+                    "guestUrl": "http://localhost:8082",
+                    "healthCheckUrl": "http://server2.test",
+                },
+                {
+                    "guestUrl": "http://localhost:8083",
+                    "healthCheckUrl": "http://server3.test",
+                },
+            ]
+        ),
+        Bucket=os.environ.get("AWS_BUCKET_NAME"),
+        Key="applications.json",
+    )
+
+    applications = [
+        {
+            "guestUrl": "http://localhost:8081",
+            "healthCheckUrl": "http://server1.test",
+        },
+        {
+            "guestUrl": "http://localhost:8082",
+            "healthCheckUrl": "http://server2.test",
+        },
+        {
+            "guestUrl": "http://localhost:8083",
+            "healthCheckUrl": "http://server3.test",
+        },
+    ]
 
 round_robin = {"index": 0}
 
@@ -44,6 +94,16 @@ def manage_applications():
             return jsonify({"error": "Bad request"}), 400
 
         applications = request.json["applications"]
+
+        s3_client.delete_object(
+            Bucket=os.environ.get("AWS_BUCKET_NAME"), Key="applications.json"
+        )
+
+        s3_client.put_object(
+            Body=json.dumps(applications),
+            Bucket=os.environ.get("AWS_BUCKET_NAME"),
+            Key="applications.json",
+        )
 
         round_robin["index"] = 0
 

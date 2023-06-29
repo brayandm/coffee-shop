@@ -34,7 +34,7 @@ def health_check(application):
 
 @app.route("/loadbalancer/apps", methods=["GET", "POST"])
 def manage_applications():
-    global applications
+    global applications, round_robin
 
     if request.method == "GET":
         return jsonify({"data": {"applications": applications}}), 200
@@ -44,6 +44,8 @@ def manage_applications():
             return jsonify({"error": "Bad request"}), 400
 
         applications = request.json["applications"]
+
+        round_robin["index"] = 0
 
         return jsonify({"data": {"applications": applications}}), 200
 
